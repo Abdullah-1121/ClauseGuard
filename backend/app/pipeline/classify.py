@@ -18,6 +18,9 @@ _CATEGORIES = ", ".join(c.value for c in ClauseCategory)
 classifier_agent = Agent(
     build_model("cheap"),
     output_type=ClassificationOutput,
+    # Open-weight models occasionally emit off-schema output; give the framework
+    # room to re-prompt with the validation error until it conforms.
+    retries=3,
     instructions=(
         "You classify a single contract clause into exactly one category from: "
         f"{_CATEGORIES}. Choose 'other' if none clearly apply. "

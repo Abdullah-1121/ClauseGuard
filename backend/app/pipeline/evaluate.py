@@ -15,6 +15,7 @@ from app.providers.factory import build_model
 evaluator_agent = Agent(
     build_model("strong"),
     output_type=EvaluationOutput,
+    retries=3,
     instructions=(
         "You are a buyer-side contract review assistant. Compare the given clause "
         "to the buyer's standard position. Decide whether it is COMPLIANT or a "
