@@ -1,0 +1,70 @@
+id: vendor_saas_buyer
+name: "Vendor SaaS Agreement — Buyer Side"
+side: buyer
+rules:
+  - category: cap_on_liability
+    standard_position: >-
+      Liability must be capped. A mutual cap of no more than 12 months of fees
+      is acceptable; an uncapped or vendor-only cap is a deviation.
+    risk_weight: high
+    preferred_redline: >-
+      Each party's total liability shall not exceed the fees paid in the 12
+      months preceding the claim.
+  - category: uncapped_liability
+    standard_position: >-
+      There must be no uncapped liability exposure for the buyer. Carve-outs to
+      the cap should be mutual and narrow (e.g. confidentiality, IP indemnity).
+    risk_weight: high
+  - category: anti_assignment
+    standard_position: >-
+      Buyer must retain the right to assign the agreement to an affiliate or in
+      connection with a merger/acquisition without vendor consent.
+    risk_weight: medium
+    preferred_redline: >-
+      Either party may assign this agreement to an affiliate or successor in a
+      merger, acquisition, or sale of substantially all assets.
+  - category: termination_for_convenience
+    standard_position: >-
+      Buyer should be able to terminate for convenience on 30 days' notice.
+    risk_weight: medium
+  - category: renewal_term
+    standard_position: >-
+      No automatic renewal without at least 30 days' prior written notice and a
+      clear opt-out. Silent auto-renewal is a deviation.
+    risk_weight: medium
+    preferred_redline: >-
+      This agreement renews only upon the buyer's written consent, with 30 days'
+      renewal notice from the vendor.
+  - category: governing_law
+    standard_position: >-
+      Governing law should be a neutral or buyer-favorable US jurisdiction
+      (e.g. Delaware). Foreign governing law is a deviation.
+    risk_weight: low
+  - category: non_compete
+    standard_position: >-
+      Buyer should not be bound by any non-compete or non-solicit restriction.
+    risk_weight: high
+  - category: exclusivity
+    standard_position: >-
+      No exclusivity obligations on the buyer.
+    risk_weight: medium
+  - category: most_favored_nation
+    standard_position: >-
+      Buyer should benefit from MFN pricing where offered; MFN obligations
+      imposed on the buyer are a deviation.
+    risk_weight: low
+  - category: ip_ownership_assignment
+    standard_position: >-
+      Buyer retains ownership of its own data and any deliverables it pays to
+      have created; background IP stays with its owner.
+    risk_weight: high
+  - category: audit_rights
+    standard_position: >-
+      Any audit rights over the buyer must be limited (reasonable notice,
+      business hours, no more than once per year).
+    risk_weight: low
+  - category: insurance
+    standard_position: >-
+      Vendor should carry commercially reasonable insurance; onerous insurance
+      obligations imposed on the buyer are a deviation.
+    risk_weight: low
