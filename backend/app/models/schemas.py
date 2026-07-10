@@ -30,6 +30,14 @@ class ClassificationOutput(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
 
 
+class ClauseLabel(BaseModel):
+    """One clause's classification within a batched request, keyed by position."""
+
+    index: int
+    category: ClauseCategory
+    confidence: float = Field(ge=0.0, le=1.0)
+
+
 class EvaluationOutput(BaseModel):
     status: FindingStatus
     risk_level: RiskLevel

@@ -12,7 +12,7 @@ from typing import Literal
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-Provider = Literal["groq", "ollama", "openrouter"]
+Provider = Literal["groq", "cerebras", "ollama", "openrouter"]
 
 
 class Settings(BaseSettings):
@@ -29,6 +29,10 @@ class Settings(BaseSettings):
 
     # Provider credentials (non-prefixed, standard env names)
     groq_api_key: str = Field("", validation_alias="GROQ_API_KEY")
+    cerebras_api_key: str = Field("", validation_alias="CEREBRAS_API_KEY")
+    cerebras_base_url: str = Field(
+        "https://api.cerebras.ai/v1", validation_alias="CEREBRAS_BASE_URL"
+    )
     openrouter_api_key: str = Field("", validation_alias="OPENROUTER_API_KEY")
     openrouter_base_url: str = Field(
         "https://openrouter.ai/api/v1", validation_alias="OPENROUTER_BASE_URL"

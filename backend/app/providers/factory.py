@@ -32,15 +32,19 @@ def build_model(role: Role, settings: Settings | None = None) -> Model:
 
         return GroqModel(model_id, provider=GroqProvider(api_key=settings.groq_api_key))
 
-    if settings.provider in ("ollama", "openrouter"):
-        # Both are OpenAI-compatible HTTP endpoints.
+    if settings.provider in ("cerebras", "ollama", "openrouter"):
+        # All are OpenAI-compatible HTTP endpoints.
         try:
             from pydantic_ai.models.openai import OpenAIChatModel as _OpenAIModel
         except ImportError:  # older pydantic-ai
             from pydantic_ai.models.openai import OpenAIModel as _OpenAIModel
         from pydantic_ai.providers.openai import OpenAIProvider
 
-        if settings.provider == "ollama":
+        if settings.provider == "cerebras":
+            provider = OpenAIProvider(
+                base_url=settings.cerebras_base_url, api_key=settings.cerebras_api_key
+            )
+        elif settings.provider == "ollama":
             provider = OpenAIProvider(base_url=settings.ollama_base_url, api_key="ollama")
         else:
             provider = OpenAIProvider(

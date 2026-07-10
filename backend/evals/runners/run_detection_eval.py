@@ -26,8 +26,7 @@ from pathlib import Path
 import structlog
 
 from app.config import get_settings
-from app.models.enums import ClauseCategory
-from app.pipeline.classify import classify_clause
+from app.pipeline.classify import classify_clauses
 from app.pipeline.parse import segment
 from evals.metrics import aggregate
 
@@ -54,27 +53,19 @@ def _load_contracts(split: str, limit: int | None) -> list[dict]:
     return [by_id[i] for i in ids if i in by_id]
 
 
-async def _classify_with_backoff(clause, sem: asyncio.Semaphore, retries: int = 5):
-    async with sem:
-        delay = 2.0
-        for attempt in range(retries):
-            try:
-                return await classify_clause(clause)
-            except Exception:
-                if attempt == retries - 1:
-                    return None
-                await asyncio.sleep(delay)
-                delay *= 2
-    return None
-
-
 async def _predict(text: str, sem: asyncio.Semaphore, max_clauses: int) -> tuple[set[str], int]:
     clauses = [c for c in segment(text) if len(c.text) >= MIN_CLAUSE_LEN][:max_clauses]
-    results = await asyncio.gather(*(_classify_with_backoff(c, sem) for c in clauses))
-    predicted = {
-        r.category.value for r in results if r is not None and r.category != ClauseCategory.OTHER
-    }
-    return predicted, len(clauses)
+    # Batched classification: ~15x fewer requests than one call per clause.
+    # One retry after a pause so a transient rate-limit doesn't lose a contract.
+    for attempt in range(2):
+        try:
+            labels = await classify_clauses(clauses, batch_size=12, semaphore=sem)
+            predicted = {label.category.value for label in labels if label.category != "other"}
+            return predicted, len(clauses)
+        except Exception:
+            if attempt == 0:
+                await asyncio.sleep(10)
+    return set(), len(clauses)
 
 
 async def run(split: str, limit: int | None, concurrency: int, max_clauses: int) -> dict:
