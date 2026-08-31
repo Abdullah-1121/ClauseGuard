@@ -14,6 +14,7 @@ from pydantic_ai.exceptions import ModelHTTPError
 
 from app.models.enums import ClauseCategory
 from app.models.schemas import ClassificationOutput, Clause, ClauseLabel
+from app.obs.langfuse import observe
 from app.providers.factory import build_model
 
 _CATEGORIES = ", ".join(c.value for c in ClauseCategory)
@@ -32,6 +33,7 @@ classifier_agent = Agent(
 )
 
 
+@observe(name="classify_clause", as_type="generation")
 async def classify_clause(clause: Clause) -> ClassificationOutput:
     result = await classifier_agent.run(clause.text)
     return result.output
@@ -75,6 +77,7 @@ def is_retryable_model_error(exc: ModelHTTPError) -> bool:
     return False
 
 
+@observe(name="classify_batch", as_type="generation")
 async def _classify_batch(
     clauses: list[Clause], max_retries: int = 8
 ) -> list[ClassificationOutput]:

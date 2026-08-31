@@ -9,7 +9,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 Provider = Literal["groq", "cerebras", "ollama", "openrouter"]
@@ -48,7 +48,10 @@ class Settings(BaseSettings):
     langfuse_public_key: str = Field("", validation_alias="LANGFUSE_PUBLIC_KEY")
     langfuse_secret_key: str = Field("", validation_alias="LANGFUSE_SECRET_KEY")
     langfuse_host: str = Field(
-        "https://cloud.langfuse.com", validation_alias="LANGFUSE_HOST"
+        "https://cloud.langfuse.com",
+        # Accept both our LANGFUSE_HOST name and the SDK-standard
+        # LANGFUSE_BASE_URL (what the official docs and .env use).
+        validation_alias=AliasChoices("LANGFUSE_HOST", "LANGFUSE_BASE_URL"),
     )
 
     # API auth

@@ -18,6 +18,7 @@ from app.models.schemas import (
     ReviewResult,
     UsageStats,
 )
+from app.obs.langfuse import observe
 from app.obs.logging import span
 from app.pipeline.classify import classify_clause
 from app.pipeline.evaluate import evaluate_clause
@@ -25,6 +26,7 @@ from app.pipeline.guardrails import needs_human_review, verify_citation
 from app.pipeline.parse import segment
 
 
+@observe(name="review", as_type="agent")
 async def review_contract(
     text: str, playbook: Playbook, settings: Settings | None = None
 ) -> ReviewResult:

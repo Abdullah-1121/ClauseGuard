@@ -13,6 +13,7 @@ from pydantic_ai import Agent
 from pydantic_ai.exceptions import ModelHTTPError
 
 from app.models.schemas import Clause, EvaluationOutput, PlaybookRule
+from app.obs.langfuse import observe
 from app.pipeline.classify import is_retryable_model_error
 from app.providers.factory import build_model
 
@@ -30,6 +31,7 @@ evaluator_agent = Agent(
 )
 
 
+@observe(name="evaluate_clause", as_type="generation")
 async def evaluate_clause(clause: Clause, rule: PlaybookRule) -> EvaluationOutput:
     prompt = (
         f"Category: {rule.category.value}\n"
