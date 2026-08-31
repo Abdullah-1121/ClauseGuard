@@ -7,9 +7,13 @@ suggested redline). Not legal advice — see disclaimer surfaced by the API.
 
 from __future__ import annotations
 
+import asyncio
+
 from pydantic_ai import Agent
+from pydantic_ai.exceptions import ModelHTTPError
 
 from app.models.schemas import Clause, EvaluationOutput, PlaybookRule
+from app.pipeline.classify import is_retryable_model_error
 from app.providers.factory import build_model
 
 evaluator_agent = Agent(
@@ -32,5 +36,15 @@ async def evaluate_clause(clause: Clause, rule: PlaybookRule) -> EvaluationOutpu
         f"Buyer's standard position: {rule.standard_position}\n\n"
         f"Clause under review:\n{clause.text}"
     )
-    result = await evaluator_agent.run(prompt)
+    delay = 1.0
+    for attempt in range(8):
+        try:
+            result = await evaluator_agent.run(prompt)
+            break
+        except ModelHTTPError as exc:
+            if is_retryable_model_error(exc) and attempt < 7:
+                await asyncio.sleep(delay if exc.status_code in (413, 429) else 1.0)
+                delay = min(delay * 2, 60.0)
+                continue
+            raise
     return result.output

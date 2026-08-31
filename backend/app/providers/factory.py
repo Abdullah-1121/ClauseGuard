@@ -34,10 +34,7 @@ def build_model(role: Role, settings: Settings | None = None) -> Model:
 
     if settings.provider in ("cerebras", "ollama", "openrouter"):
         # All are OpenAI-compatible HTTP endpoints.
-        try:
-            from pydantic_ai.models.openai import OpenAIChatModel as _OpenAIModel
-        except ImportError:  # older pydantic-ai
-            from pydantic_ai.models.openai import OpenAIModel as _OpenAIModel
+        from pydantic_ai.models.openai import OpenAIChatModel as _OpenAIModel
         from pydantic_ai.providers.openai import OpenAIProvider
 
         if settings.provider == "cerebras":

@@ -45,10 +45,13 @@ async def run() -> dict:
         gold = set(example["gold_deviations"])
         pairs.append((predicted, gold))
 
-    metrics = aggregate(pairs)
-    metrics["provider"] = settings.provider
-    metrics["model_strong"] = settings.model_strong
-    metrics["timestamp"] = datetime.now(UTC).isoformat()
+    metrics = {
+        **aggregate(pairs),
+        "provider": settings.provider,
+        "model_strong": settings.model_strong,
+        "model_cheap": settings.model_cheap,
+        "timestamp": datetime.now(UTC).isoformat(),
+    }
     return metrics
 
 

@@ -24,8 +24,8 @@ class Settings(BaseSettings):
 
     # Inference
     provider: Provider = "groq"
-    model_strong: str = "llama-3.3-70b-versatile"
-    model_cheap: str = "llama-3.1-8b-instant"
+    model_strong: str = "openai/gpt-oss-120b"
+    model_cheap: str = "openai/gpt-oss-20b"
 
     # Provider credentials (non-prefixed, standard env names)
     groq_api_key: str = Field("", validation_alias="GROQ_API_KEY")

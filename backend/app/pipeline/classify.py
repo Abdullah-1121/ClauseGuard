@@ -54,13 +54,36 @@ batch_classifier_agent = Agent(
 )
 
 
+def is_retryable_model_error(exc: ModelHTTPError) -> bool:
+    """True for transient failures worth a retry, not config/auth bugs.
+
+    Rate limits that reset in seconds (RPM) are worth backing off for. A
+    consumed daily allowance (TPD) resets over a rolling 24h window — no
+    backoff inside one run fixes that, so it must fail fast, not fake-hang.
+    Open-weight reasoning models occasionally emit an essay instead of the
+    requested JSON, which Groq rejects with 400 `output_parse_failed` on that
+    generation only.
+    """
+    if exc.status_code == 429 and isinstance(exc.body, dict):
+        msg = exc.body.get("error", {}).get("message", "")
+        if "tokens per day" in msg:
+            return False  # daily quota spent; retrying can't help this run
+    if exc.status_code in (413, 429):
+        return True
+    if exc.status_code == 400 and isinstance(exc.body, dict):
+        return exc.body.get("error", {}).get("code") == "output_parse_failed"
+    return False
+
+
 async def _classify_batch(
-    clauses: list[Clause], max_retries: int = 6
+    clauses: list[Clause], max_retries: int = 8
 ) -> list[ClassificationOutput]:
     """Classify one batch of clauses in a single request; align results by index.
 
-    Handles free-tier rate limits gracefully: on HTTP 429 it backs off and
-    retries rather than failing the request.
+    Handles free-tier rate limits gracefully: on HTTP 429 (RPM) and 413
+    (`rate_limit_exceeded`, TPM) it backs off and retries rather than failing.
+    Backoff patience (~90s) exceeds a TPM window so a rolling quota can drain.
+    Output-parse failures retry on a 1s cadence (flaky, not quota-bound).
     """
     numbered = "\n\n".join(f"[{i}] {c.text}" for i, c in enumerate(clauses))
     delay = 1.0
@@ -69,9 +92,11 @@ async def _classify_batch(
             result = await batch_classifier_agent.run(numbered)
             break
         except ModelHTTPError as exc:
-            if exc.status_code == 429 and attempt < max_retries - 1:
-                await asyncio.sleep(delay)
-                delay = min(delay * 2, 30.0)
+            if is_retryable_model_error(exc) and attempt < max_retries - 1:
+                # Rate limits wait out the window (exponential); a failed JSON
+                # generation is just bowl-flush luck and retries immediately.
+                await asyncio.sleep(delay if exc.status_code in (413, 429) else 1.0)
+                delay = min(delay * 2, 60.0)
                 continue
             raise
     by_index = {label.index: label for label in result.output}
@@ -87,11 +112,31 @@ async def _classify_batch(
 
 async def classify_clauses(
     clauses: list[Clause],
-    batch_size: int = 12,
+    batch_size: int = 8,
+    max_batch_chars: int = 6000,
     semaphore: asyncio.Semaphore | None = None,
 ) -> list[ClassificationOutput]:
-    """Classify many clauses using batched requests, run concurrently."""
-    batches = [clauses[i : i + batch_size] for i in range(0, len(clauses), batch_size)]
+    """Classify many clauses using batched requests, run concurrently.
+
+    Batches are capped by *characters*, not just clause count. A fixed clause
+    count is a trap: a batch of long real contract clauses (some 1,700+ chars)
+    blows past the model's output-token ceiling, the model emits truncated JSON,
+    and Groq fires `output_parse_failed` 400s that loop through retries. Capping
+    total batch size (default 6,000 chars) keeps each request digestible while
+    batch_size (default 8) still bounds the clause count.
+    """
+    batches: list[list[Clause]] = []
+    cur: list[Clause] = []
+    cur_chars = 0
+    for clause in clauses:
+        nxt = cur_chars + len(clause.text)
+        if cur and (nxt > max_batch_chars or len(cur) >= batch_size):
+            batches.append(cur)
+            cur, cur_chars = [], 0
+        cur.append(clause)
+        cur_chars += len(clause.text)
+    if cur:
+        batches.append(cur)
 
     async def run_batch(batch: list[Clause]) -> list[ClassificationOutput]:
         if semaphore is None:
