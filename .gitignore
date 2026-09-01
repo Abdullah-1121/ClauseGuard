@@ -40,3 +40,9 @@ Thumbs.db
 backend/evals/reports/*.json
 backend/evals/reports/*.md
 !backend/evals/reports/.gitkeep
+
+opencode.json
+workspace.png
+frontend-results.png
+LICENSE
+brag-output
