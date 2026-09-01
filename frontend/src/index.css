@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Audit-grade visual language:
+   - near-black surfaces, precise hairlines (white/10)
+   - one accent used only for "signals" (risk/deviation)
+   - mono for data, Inter for reading
+   - no gradients, no glow, no rounded-everything */
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: #0a0a0b;
+  color: #e7e7e9;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Selection + focus are crisp, not rounded-sm blobs */
+::selection {
+  background: rgba(217, 70, 239, 0.25);
+}
+
+/* Thin custom scrollbars for the document pane */
+.docs-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.docs-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+.docs-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}

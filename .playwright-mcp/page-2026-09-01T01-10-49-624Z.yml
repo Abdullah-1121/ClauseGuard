@@ -1,0 +1,59 @@
+- generic [ref=f6e3]:
+  - banner [ref=f6e4]:
+    - generic [ref=f6e5]:
+      - generic [ref=f6e6]: ¶
+      - generic [ref=f6e8]: ClauseGuard
+      - generic [ref=f6e9]: v0.1
+    - generic [ref=f6e10]: Contract risk audit
+  - generic [ref=f6e36]:
+    - generic [ref=f6e37]:
+      - generic [ref=f6e38]:
+        - generic [ref=f6e39]: "2"
+        - generic [ref=f6e40]: Clauses
+      - generic [ref=f6e41]:
+        - generic [ref=f6e42]: "0"
+        - generic [ref=f6e43]: Deviations
+      - generic [ref=f6e44]:
+        - generic [ref=f6e45]: "2"
+        - generic [ref=f6e46]: Compliant
+      - generic [ref=f6e47]:
+        - generic [ref=f6e48]: 5529 ms
+        - generic [ref=f6e49]: 2 findings
+        - button "New audit" [ref=f6e50] [cursor=pointer]
+    - generic [ref=f6e51]:
+      - complementary [ref=f6e52]:
+        - generic [ref=f6e53]: Findings · ranked by risk
+        - generic [ref=f6e54]:
+          - button "#1 · anti_assignment None The clause prohibits any assignment without prior written consent, directly contradicting the buyer’s standard right to assign to affiliates or in M&A scenarios without consent. This limits the buyer’s flexibility and is a high‑risk deviation. 97% deviation" [active] [ref=f6e55] [cursor=pointer]:
+            - generic [ref=f6e56]:
+              - generic [ref=f6e58]: "#1 · anti_assignment"
+              - generic [ref=f6e59]: None
+            - paragraph [ref=f6e60]: The clause prohibits any assignment without prior written consent, directly contradicting the buyer’s standard right to assign to affiliates or in M&A scenarios without consent. This limits the buyer’s flexibility and is a high‑risk deviation.
+            - generic [ref=f6e61]:
+              - generic [ref=f6e62]: 97%
+              - generic [ref=f6e66]: deviation
+          - button "#2 · uncapped_liability None The clause provides unlimited vendor liability, directly contradicting the buyer's standard requirement for a liability cap with narrow carve-outs. This creates a high risk of uncapped exposure for the buyer. 96% deviation" [ref=f6e67] [cursor=pointer]:
+            - generic [ref=f6e68]:
+              - generic [ref=f6e70]: "#2 · uncapped_liability"
+              - generic [ref=f6e71]: None
+            - paragraph [ref=f6e72]: The clause provides unlimited vendor liability, directly contradicting the buyer's standard requirement for a liability cap with narrow carve-outs. This creates a high risk of uncapped exposure for the buyer.
+            - generic [ref=f6e73]:
+              - generic [ref=f6e74]: 96%
+              - generic [ref=f6e78]: deviation
+      - generic [ref=f6e79]:
+        - generic [ref=f6e80]:
+          - generic [ref=f6e81]: Clause map
+          - generic [ref=f6e82]:
+            - button "1" [ref=f6e83] [cursor=pointer]
+            - button "2" [ref=f6e86] [cursor=pointer]
+        - generic [ref=f6e89]:
+          - generic [ref=f6e90]:
+            - generic [ref=f6e91]:
+              - generic [ref=f6e92]: Clause 1
+              - generic [ref=f6e93]: None
+            - paragraph [ref=f6e94]: 1. Limitation of Liability. Vendor liability shall be unlimited.
+          - generic [ref=f6e95]:
+            - generic [ref=f6e96]:
+              - generic [ref=f6e97]: Clause 2
+              - generic [ref=f6e98]: None
+            - paragraph [ref=f6e99]: 2. Assignment. Customer shall not assign without prior written consent.
