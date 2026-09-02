@@ -5,7 +5,7 @@ export default {
     extend: {
       fontFamily: {
         sans: [
-          "Inter",
+          "Manrope",
           "ui-sans-serif",
           "system-ui",
           "-apple-system",
@@ -22,18 +22,16 @@ export default {
         ],
       },
       colors: {
-        // Audit-studio base surfaces
+        // Paper-studio base surfaces (light)
         ink: {
-          DEFAULT: "#0a0a0b",
-          900: "#0d0d0f",
-          800: "#131316",
-          700: "#1a1a1e",
-          600: "#232329",
+          DEFAULT: "#f6f6f4",
+          900: "#ffffff",
+          800: "#efefec",
+          700: "#e7e7e2",
+          600: "#dbdbd5",
         },
-        hairline: "rgba(255,255,255,0.08)",
+        hairline: "rgba(0,0,0,0.09)",
       },
-      // Risk levels — desaturated, readable on dark
-      // (kept in JS for badge composition; these are helper tokens)
     },
   },
   plugins: [],

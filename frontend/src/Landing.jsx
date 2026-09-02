@@ -38,10 +38,10 @@ export default function Landing({
     <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-8 docs-scroll">
       <div className="w-full max-w-2xl">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+          <h1 className="text-2xl font-semibold tracking-tight text-stone-900">
             Review a contract against your playbook
           </h1>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-stone-400">
+          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-stone-600">
             Paste or upload — ClauseGuard segments the clauses, judges each
             against the buyer standard, and returns ranked deviations with
             grounded citations and redlines.
@@ -71,7 +71,7 @@ export default function Landing({
               key={i}
               className="rounded-[4px] border border-hairline bg-ink-800 p-3"
             >
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-300">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-700">
                 {v.title}
               </p>
               <p className="mt-1.5 text-xs leading-relaxed text-stone-500">
@@ -110,7 +110,7 @@ function InputCard({
           Upload file
         </Tab>
         {view === "file" && (
-          <span className="ml-auto font-mono text-[10px] uppercase tracking-wide text-stone-600">
+          <span className="ml-auto font-mono text-[10px] uppercase tracking-wide text-stone-500">
             PDF · DOCX · scanned rejected
           </span>
         )}
@@ -124,10 +124,10 @@ function InputCard({
             placeholder="Paste a contract, or a section of it…"
             rows={7}
             autoFocus
-            className="w-full resize-y rounded-[4px] border border-white/10 bg-ink-800 px-3 py-2.5 text-sm text-stone-200 placeholder:text-stone-600 focus:border-white/25 focus:outline-none"
+            className="w-full resize-y rounded-[4px] border border-black/10 bg-ink-800 px-3 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 focus:border-black/25 focus:outline-none"
           />
           <div className="mt-3 flex items-center justify-between">
-            <span className="font-mono text-[11px] text-stone-600">
+            <span className="font-mono text-[11px] text-stone-500">
               {text.trim() ? `${text.length} chars` : "ready"}
             </span>
             <RunButton
@@ -144,8 +144,8 @@ function InputCard({
           <label
             className={`flex cursor-pointer flex-col items-center gap-2 rounded-[4px] border border-dashed px-4 py-10 text-center ${
               gated
-                ? "border-white/10 bg-ink-800/50"
-                : "border-white/15 bg-ink-800 hover:border-white/30"
+                ? "border-black/10 bg-ink-800/50"
+                : "border-black/15 bg-ink-800 hover:border-black/30"
             }`}
           >
             <input
@@ -156,14 +156,14 @@ function InputCard({
               disabled={gated}
               onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
             />
-            <span className="text-sm text-stone-300">
+            <span className="text-sm text-stone-700">
               {isLoading
                 ? "Auditing…"
                 : gated
                   ? "Enter your API key above to unlock"
                   : "Drop a contract here, or click to browse"}
             </span>
-            <span className="font-mono text-[11px] text-stone-600">
+            <span className="font-mono text-[11px] text-stone-500">
               .pdf · .docx — digital files only
             </span>
           </label>
@@ -171,7 +171,7 @@ function InputCard({
       )}
 
       {error && (
-        <div className="border-t border-red-500/20 bg-red-500/8 px-4 py-3 text-sm text-red-300">
+        <div className="border-t border-red-500/30 bg-red-500/[0.06] px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -185,8 +185,8 @@ function Tab({ active, onClick, children }) {
       onClick={onClick}
       className={`rounded-[3px] px-2.5 py-1 text-xs transition-colors ${
         active
-          ? "bg-white/8 text-white"
-          : "text-stone-500 hover:bg-white/5 hover:text-stone-300"
+          ? "bg-black/8 text-stone-900"
+          : "text-stone-500 hover:bg-black/5 hover:text-stone-700"
       }`}
     >
       {children}
@@ -199,7 +199,7 @@ function RunButton({ children, onClick, disabled, loading }) {
     <button
       onClick={onClick}
       disabled={disabled}
-      className="rounded-[4px] bg-amber-400 px-4 py-2 text-sm font-semibold text-amber-950 transition-colors hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
+      className="rounded-[4px] bg-amber-400 px-4 py-2 text-sm font-semibold text-amber-950 transition-colors hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-40"
     >
       {loading ? "Auditing…" : children}
     </button>
@@ -208,7 +208,7 @@ function RunButton({ children, onClick, disabled, loading }) {
 
 function Disclosure() {
   return (
-    <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-stone-600">
+    <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-stone-500">
       Review assistance — not legal advice
     </p>
   );

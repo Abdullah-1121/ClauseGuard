@@ -82,7 +82,7 @@ export default function Home({ onStart }) {
       <BringYourOwnKey />
       <FinalCta onStart={onStart} />
       <footer className="border-t border-hairline px-6 py-6 text-center">
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone-600">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone-500">
           Review assistance — not legal advice · MIT licensed
         </p>
       </footer>
@@ -137,12 +137,12 @@ function SiteHeader({ onStart }) {
     <header className="sticky top-0 z-10 border-b border-hairline bg-ink/95 px-6 py-3 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-6 w-6 items-center justify-center rounded-[3px] border border-white/15 bg-white/5">
-            <span className="font-mono text-[11px] font-bold leading-none text-amber-300">
+          <div className="flex h-6 w-6 items-center justify-center rounded-[3px] border border-black/15 bg-black/5">
+            <span className="font-mono text-[11px] font-bold leading-none text-amber-600">
               ¶
             </span>
           </div>
-          <span className="text-[15px] font-semibold tracking-tight text-white">
+          <span className="text-[15px] font-semibold tracking-tight text-stone-900">
             ClauseGuard
           </span>
         </div>
@@ -152,7 +152,7 @@ function SiteHeader({ onStart }) {
           <NavLink onClick={() => go("numbers")}>Results</NavLink>
           <button
             onClick={onStart}
-            className="rounded-[4px] bg-amber-400 px-3.5 py-1.5 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-300"
+            className="rounded-[4px] bg-amber-400 px-3.5 py-1.5 text-xs font-semibold text-amber-950 transition-colors hover:bg-amber-500"
           >
             Run an audit
           </button>
@@ -166,7 +166,7 @@ function NavLink({ onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className="text-xs font-medium text-stone-400 transition-colors hover:text-white"
+      className="text-xs font-medium text-stone-600 transition-colors hover:text-stone-900"
     >
       {children}
     </button>
@@ -177,14 +177,14 @@ function Hero({ onStart }) {
   return (
     <section className="border-b border-hairline px-6 pb-20 pt-20">
       <div className="mx-auto max-w-3xl text-center">
-        <p className="mx-auto mb-6 w-fit rounded-full border border-hairline bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-stone-400">
+        <p className="mx-auto mb-6 w-fit rounded-full border border-hairline bg-ink-800 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-stone-500">
           AI contract risk audit · built on evals, not vibes
         </p>
-        <h1 className="text-[44px] font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl">
+        <h1 className="text-[44px] font-semibold leading-[1.08] tracking-tight text-stone-900 sm:text-6xl">
           The AI reviewer that can only cite{" "}
-          <span className="text-amber-300">what it actually read</span>
+          <span className="text-amber-600">what it actually read</span>
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-stone-400">
+        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-stone-500">
           ClauseGuard turns a contract into ranked, citation-grounded risk
           findings — a probabilistic LLM confined inside a deterministic system
           that is measured, not hoped about.
@@ -192,7 +192,7 @@ function Hero({ onStart }) {
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
           <button
             onClick={onStart}
-            className="rounded-[4px] bg-amber-400 px-7 py-3.5 text-sm font-semibold text-amber-950 transition-colors hover:bg-amber-300"
+            className="rounded-[4px] bg-amber-400 px-7 py-3.5 text-sm font-semibold text-amber-950 transition-colors hover:bg-amber-500"
           >
             Audit your first contract
           </button>
@@ -200,7 +200,7 @@ function Hero({ onStart }) {
             onClick={() =>
               document.getElementById("how")?.scrollIntoView({ behavior: "smooth" })
             }
-            className="rounded-[4px] border border-white/15 px-7 py-3.5 text-sm font-medium text-stone-300 transition-colors hover:border-white/30 hover:text-white"
+            className="rounded-[4px] border border-black/15 px-7 py-3.5 text-sm font-medium text-stone-700 transition-colors hover:border-black/30 hover:text-stone-900"
           >
             See how it works
           </button>
@@ -219,7 +219,7 @@ function Hero({ onStart }) {
 function PipelineDiagram({ className = "" }) {
   return (
     <div className={`machined mx-auto w-full max-w-4xl rounded-[4px] border border-hairline bg-ink-900 ${className}`}>
-      <div className="flex items-center justify-between border-b border-hairline px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-stone-600">
+      <div className="flex items-center justify-between border-b border-hairline px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-stone-500">
         <span>The pipeline · one pass, six seams</span>
         <span className="hidden items-center gap-1.5 sm:flex">
           <span className="h-1 w-1 rounded-full bg-amber-400" />
@@ -232,22 +232,22 @@ function PipelineDiagram({ className = "" }) {
             key={s.n}
             className={`rounded-[4px] border px-3 py-2.5 text-left ${
               s.deterministic
-                ? "border-amber-400/30 bg-amber-400/[0.05] machined"
+                ? "border-amber-500/40 bg-amber-500/[0.07] machined"
                 : "border-hairline bg-ink-800"
             }`}
           >
             <span
               className={`font-mono text-[12px] font-semibold ${
-                s.deterministic ? "text-amber-300" : "text-stone-600"
+                s.deterministic ? "text-amber-700" : "text-stone-500"
               }`}
             >
               {s.n}
             </span>
-            <p className="mt-1 text-[12px] font-semibold text-white">{s.title}</p>
+            <p className="mt-1 text-[12px] font-semibold text-stone-900">{s.title}</p>
           </div>
         ))}
       </div>
-      <p className="border-t border-hairline px-4 py-2 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-stone-600">
+      <p className="border-t border-hairline px-4 py-2 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-stone-500">
         two seams are deterministic · four are an LLM call · the output is a triage
       </p>
     </div>
@@ -260,10 +260,10 @@ function Problem() {
       <Reveal>
         <div className="mx-auto max-w-3xl">
           <SectionLabel>Why this exists</SectionLabel>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900">
             Not another chat box.
           </h2>
-          <p className="mt-5 text-base leading-relaxed text-stone-400">
+          <p className="mt-5 text-base leading-relaxed text-stone-500">
             Most "AI contract review" is a prompt, a prayer, and a confident
             paragraph of blobs — nothing between the model's imagination and
             your legal team. ClauseGuard is engineered the other way around:
@@ -285,7 +285,7 @@ function HowItWorks() {
       <Reveal>
         <div className="mx-auto max-w-5xl">
           <SectionLabel>How it works</SectionLabel>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900">
             Six deterministic seams, one probabilistic judge
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -296,12 +296,12 @@ function HowItWorks() {
                 style={{ transitionDelay: `${i * 40}ms` }}
               >
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-lg font-semibold text-stone-600">
+                  <span className="font-mono text-lg font-semibold text-stone-500">
                     {s.n}
                   </span>
-                  <span className="text-sm font-semibold text-white">{s.title}</span>
+                  <span className="text-sm font-semibold text-stone-900">{s.title}</span>
                   {s.deterministic && (
-                    <span className="ml-auto rounded-[2px] border border-amber-400/25 bg-amber-400/10 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-amber-300">
+                    <span className="ml-auto rounded-[2px] border border-amber-500/40 bg-amber-500/[0.08] px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-amber-800">
                       deterministic
                     </span>
                   )}
@@ -324,13 +324,13 @@ function Reliability() {
       <Reveal>
         <div className="mx-auto max-w-5xl">
           <SectionLabel>The reliability engineering</SectionLabel>
-          <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-white">
+          <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-stone-900">
             The part a demo never shows you
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-2.5 lg:grid-cols-3">
             {RIGOR.map((r) => (
               <div key={r.title} className="machined rounded-[4px] border border-hairline bg-ink-900 p-6">
-                <p className="text-sm font-semibold text-white">{r.title}</p>
+                <p className="text-sm font-semibold text-stone-900">{r.title}</p>
                 <p className="mt-2.5 text-[13px] leading-relaxed text-stone-500">{r.body}</p>
               </div>
             ))}
@@ -347,11 +347,11 @@ function Results() {
       <Reveal>
         <div className="mx-auto max-w-3xl">
           <SectionLabel>Real numbers</SectionLabel>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900">
             Scored against humans, not another model
           </h2>
           <div className="machined mt-10 overflow-hidden rounded-[4px] border border-hairline bg-ink-900">
-            <div className="flex items-center justify-between border-b border-hairline bg-ink-800 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-stone-600">
+            <div className="flex items-center justify-between border-b border-hairline bg-ink-800 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-stone-500">
               <span>Metric</span>
               <span className="flex gap-6">
                 <span className="w-16 text-right">Detection</span>
@@ -362,22 +362,22 @@ function Results() {
               <div
                 key={n.metric}
                 className={`flex items-center justify-between gap-3 px-4 py-3 ${
-                  n.highlight ? "bg-amber-400/[0.06]" : ""
+                  n.highlight ? "bg-amber-500/[0.08]" : ""
                 }`}
               >
-                <span className={`text-sm ${n.highlight ? "font-medium text-amber-200" : "text-stone-300"}`}>
+                <span className={`text-sm ${n.highlight ? "font-medium text-amber-800" : "text-stone-700"}`}>
                   {n.metric}
                 </span>
                 <span className="flex items-center gap-6 font-mono text-sm">
                   <span className="w-16 text-right text-stone-500">{n.detection}</span>
-                  <span className={`w-16 text-right ${n.highlight ? "font-semibold text-amber-300" : "text-stone-300"}`}>
+                  <span className={`w-16 text-right ${n.highlight ? "font-semibold text-amber-700" : "text-stone-700"}`}>
                     {n.full}
                   </span>
                 </span>
               </div>
             ))}
           </div>
-          <p className="mt-4 text-[13px] leading-relaxed text-stone-600">
+          <p className="mt-4 text-[13px] leading-relaxed text-stone-500">
             Directional, not a benchmark — the free-tier quota caps runs to a
             few contracts a day. Read them honestly: recall on diverse legal
             prose is the hard, unsolved part; the 72% rule-vs-LLM agreement is
@@ -395,10 +395,10 @@ function BringYourOwnKey() {
       <Reveal>
         <div className="mx-auto max-w-3xl">
           <SectionLabel>The product</SectionLabel>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900">
             Your key. Your model. Your quota.
           </h2>
-          <p className="mt-5 text-base leading-relaxed text-stone-400">
+          <p className="mt-5 text-base leading-relaxed text-stone-500">
             No account, no credit card, no lock-in. Bring any Groq or OpenRouter
             key, pick a model from the menu, and the review runs on{" "}
             <em>your</em> wallet — the server never sees your key past the
@@ -422,15 +422,15 @@ function FinalCta({ onStart }) {
     <section className="px-6 py-24 text-center">
       <Reveal>
         <div className="mx-auto max-w-xl">
-          <h2 className="text-3xl font-semibold tracking-tight text-white">
+          <h2 className="text-3xl font-semibold tracking-tight text-stone-900">
             Paste a contract. Watch it get eviscerated.
           </h2>
-          <p className="mt-3 text-sm text-stone-400">
+          <p className="mt-3 text-sm text-stone-600">
             Two minutes, one free key, one honest review.
           </p>
           <button
             onClick={onStart}
-            className="mt-8 rounded-[4px] bg-amber-400 px-8 py-3.5 text-sm font-semibold text-amber-950 transition-colors hover:bg-amber-300"
+            className="mt-8 rounded-[4px] bg-amber-400 px-8 py-3.5 text-sm font-semibold text-amber-950 transition-colors hover:bg-amber-500"
           >
             Open the review tool
           </button>

@@ -63,7 +63,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-ink text-stone-200">
+    <div className="flex h-screen flex-col overflow-hidden bg-ink text-stone-900">
       {mode === "home" ? (
         <Home onStart={() => setMode("tool")} />
       ) : (
@@ -109,19 +109,19 @@ function Header({ onHome }) {
     <header className="flex items-center justify-between border-b border-hairline px-6 py-3">
       <div className="flex items-center gap-2.5">
         <button onClick={onHome} className="flex items-center gap-2.5">
-          <div className="flex h-6 w-6 items-center justify-center rounded-[3px] border border-white/15 bg-white/5">
-            <span className="font-mono text-[11px] font-bold leading-none text-amber-300">¶</span>
+          <div className="flex h-6 w-6 items-center justify-center rounded-[3px] border border-black/15 bg-black/5">
+            <span className="font-mono text-[11px] font-bold leading-none text-amber-600">¶</span>
           </div>
-          <span className="text-[15px] font-semibold tracking-tight text-white">ClauseGuard</span>
+          <span className="text-[15px] font-semibold tracking-tight text-stone-900">ClauseGuard</span>
         </button>
-        <span className="ml-1 hidden rounded-[2px] border border-white/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-stone-500 sm:inline">
+        <span className="ml-1 hidden rounded-[2px] border border-black/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-stone-500 sm:inline">
           v0.1
         </span>
       </div>
       <div className="flex items-center gap-4">
         <button
           onClick={onHome}
-          className="font-mono text-[11px] uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-white"
+          className="font-mono text-[11px] uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-stone-900"
         >
           ← Back to site
         </button>

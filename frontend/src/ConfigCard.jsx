@@ -61,11 +61,11 @@ export default function ConfigCard({ config, onChange, catalog }) {
       >
         <span
           className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-            hasKey ? "bg-emerald-400" : "bg-stone-700"
+            hasKey ? "bg-emerald-500" : "bg-stone-400"
           }`}
         />
         <span className="flex min-w-0 items-center gap-2 text-xs">
-          <span className={`font-medium ${hasKey ? "text-stone-200" : "text-stone-400"}`}>
+          <span className={`font-medium ${hasKey ? "text-stone-800" : "text-stone-600"}`}>
             {hasKey ? "Connected" : "Bring your own API key"}
           </span>
           {hasKey && (
@@ -74,7 +74,7 @@ export default function ConfigCard({ config, onChange, catalog }) {
             </span>
           )}
         </span>
-        <span className="ml-auto hidden font-mono text-[10px] uppercase tracking-[0.16em] text-stone-600 sm:block">
+        <span className="ml-auto hidden font-mono text-[10px] uppercase tracking-[0.16em] text-stone-500 sm:block">
           your model · your quota
         </span>
         <svg
@@ -140,12 +140,12 @@ export default function ConfigCard({ config, onChange, catalog }) {
 }
 
 const selectCls =
-  "w-full rounded-[4px] border border-white/10 bg-ink-800 px-3 py-2 text-sm text-stone-200 placeholder:text-stone-600 focus:border-white/25 focus:outline-none";
+  "w-full rounded-[4px] border border-black/10 bg-ink-800 px-3 py-2 text-sm text-stone-800 placeholder:text-stone-400 focus:border-black/25 focus:outline-none";
 
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="mb-1 flex font-mono text-[10px] uppercase tracking-[0.14em] text-stone-600">
+      <span className="mb-1 flex font-mono text-[10px] uppercase tracking-[0.14em] text-stone-500">
         {label}
       </span>
       {children}

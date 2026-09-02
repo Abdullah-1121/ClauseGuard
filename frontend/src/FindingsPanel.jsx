@@ -6,7 +6,7 @@ export default function FindingsPanel({ findings, activeIndex, onSelect }) {
     return (
       <aside className="border-r border-hairline bg-ink-900 p-6">
         <p className="font-mono text-xs text-stone-500">No deviations flagged.</p>
-        <p className="mt-1.5 text-xs leading-relaxed text-stone-600">
+        <p className="mt-1.5 text-xs leading-relaxed text-stone-500">
           Every clause was checked against the playbook — nothing needed a redline.
         </p>
       </aside>
@@ -42,12 +42,12 @@ function FindingRow({ finding, index, active, onSelect }) {
     <button
       onClick={onSelect}
       className={`block w-full border-b border-hairline/70 border-l-2 px-4 py-3 text-left transition-colors ${
-        active ? r.border + " bg-white/[0.03]" : "border-l-transparent hover:bg-white/[0.015]"
+        active ? r.border + " bg-black/[0.03]" : "border-l-transparent hover:bg-black/[0.02]"
       }`}
     >
       <div className="flex items-center gap-2">
         <span className={`h-1.5 w-1.5 rounded-full ${r.dot}`} />
-        <span className="flex-1 font-mono text-[11px] uppercase tracking-wide text-stone-400">
+        <span className="flex-1 font-mono text-[11px] uppercase tracking-wide text-stone-600">
           #{index + 1} · {finding.category}
         </span>
         <span className={`rounded-[2px] border px-1.5 py-0.5 font-mono text-[9px] uppercase ${r.badge}`}>
@@ -55,7 +55,7 @@ function FindingRow({ finding, index, active, onSelect }) {
         </span>
       </div>
 
-      <p className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-stone-400">
+      <p className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-stone-600">
         {finding.rationale}
       </p>
 
@@ -74,9 +74,9 @@ function Confidence({ pct }) {
   return (
     <span className="flex items-center gap-1.5 font-mono text-[10px] text-stone-500">
       <span className="tabular-nums">{pct}%</span>
-      <span className="inline-block h-1 w-12 overflow-hidden rounded-full bg-white/10">
+      <span className="inline-block h-1 w-12 overflow-hidden rounded-full bg-black/10">
         <span
-          className={`block h-full ${pct >= 70 ? "bg-emerald-400/70" : pct >= 50 ? "bg-amber-400/70" : "bg-red-400/70"}`}
+          className={`block h-full ${pct >= 70 ? "bg-emerald-500/80" : pct >= 50 ? "bg-amber-500/80" : "bg-red-500/80"}`}
           style={{ width: `${pct}%` }}
         />
       </span>
@@ -86,7 +86,7 @@ function Confidence({ pct }) {
 
 function HumanReview() {
   return (
-    <span className="ml-auto rounded-[2px] border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 font-mono text-[9px] uppercase text-amber-300">
+    <span className="ml-auto rounded-[2px] border border-amber-500/40 bg-amber-500/[0.08] px-1.5 py-0.5 font-mono text-[9px] uppercase text-amber-800">
       human review
     </span>
   );

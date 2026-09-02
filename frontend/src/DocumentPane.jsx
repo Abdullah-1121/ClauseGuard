@@ -35,16 +35,16 @@ export default function DocumentPane({ text, findings, activeIndex, onSelect }) 
               key={c.findIdx}
               onClick={() => jump(c.findIdx)}
               className={`flex items-center gap-1 rounded-[2px] border px-1.5 py-0.5 transition-colors ${
-                c.findIdx === activeIndex ? c.badge + " ring-1 ring-white/30" : "border-transparent opacity-70 hover:opacity-100"
+                c.findIdx === activeIndex ? c.badge + " ring-1 ring-black/20" : "border-transparent opacity-70 hover:opacity-100"
               }`}
               title={`Clause ${c.num}: ${c.riskLabel}`}
             >
               <span className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
-              <span className="font-mono text-[9px] text-stone-400">{c.num}</span>
+              <span className="font-mono text-[9px] text-stone-500">{c.num}</span>
             </button>
           ))}
           {clauses.length === 0 && (
-            <span className="font-mono text-[10px] text-stone-600">no clauses</span>
+            <span className="font-mono text-[10px] text-stone-500">no clauses</span>
           )}
         </div>
       </div>
@@ -52,7 +52,7 @@ export default function DocumentPane({ text, findings, activeIndex, onSelect }) 
       <div className="flex-1 px-6 py-6">
         {clauses.map((c, i) =>
           c.kind === "filler" ? (
-            <p key={i} className="mb-3 whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-stone-600">
+            <p key={i} className="mb-3 whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-stone-500">
               {c.textContent}
             </p>
           ) : (
@@ -63,7 +63,7 @@ export default function DocumentPane({ text, findings, activeIndex, onSelect }) 
               title={c.kind === "clause" ? `Select finding #${c.findIdx + 1}` : undefined}
               className={`mb-3 rounded-[4px] border-l-2 py-3 pl-3 pr-2 ${
                 c.kind === "clause"
-                  ? `cursor-pointer transition-colors ${c.findIdx === activeIndex ? c.activeCard : "border-l-transparent hover:bg-white/[0.015]"}`
+                  ? `cursor-pointer transition-colors ${c.findIdx === activeIndex ? c.activeCard : "border-l-transparent hover:bg-black/[0.02]"}`
                   : "border-l-transparent"
               }`}
             >
@@ -75,12 +75,12 @@ export default function DocumentPane({ text, findings, activeIndex, onSelect }) 
                   {c.riskLabel}
                 </span>
               </div>
-              <p className="font-mono text-[13px] leading-relaxed text-stone-300">{c.textContent}</p>
+              <p className="font-mono text-[13px] leading-relaxed text-stone-700">{c.textContent}</p>
             </div>
           )
         )}
         {clauses.length === 0 && (
-          <p className="py-10 text-center font-mono text-xs text-stone-600">
+          <p className="py-10 text-center font-mono text-xs text-stone-500">
             {text ? "No cited clauses to map." : "Source text available only for pasted input."}
           </p>
         )}
@@ -126,15 +126,15 @@ function buildClauses(text, findings) {
 }
 
 const RISK_STYLE = {
-  HIGH: { label: "High", dot: "bg-red-500", text: "text-red-300", badge: "border-red-500/40 bg-red-500/10 text-red-300", card: "bg-red-500/[0.06] border-l-red-500" },
-  MEDIUM: { label: "Medium", dot: "bg-amber-400", text: "text-amber-300", badge: "border-amber-400/40 bg-amber-400/10 text-amber-200", card: "bg-amber-400/[0.05] border-l-amber-400" },
-  LOW: { label: "Low", dot: "bg-yellow-300", text: "text-yellow-200", badge: "border-yellow-300/30 bg-yellow-300/8 text-yellow-100", card: "bg-yellow-300/[0.04] border-l-yellow-300" },
-  NONE: { label: "None", dot: "bg-stone-500", text: "text-stone-400", badge: "border-stone-500/30 bg-stone-500/10 text-stone-300", card: "bg-stone-500/[0.04] border-l-stone-500" },
+  HIGH: { label: "High", dot: "bg-red-500", text: "text-red-600", badge: "border-red-500/40 bg-red-500/[0.06] text-red-700", card: "bg-red-500/[0.05] border-l-red-500" },
+  MEDIUM: { label: "Medium", dot: "bg-amber-500", text: "text-amber-700", badge: "border-amber-500/40 bg-amber-500/[0.08] text-amber-800", card: "bg-amber-500/[0.07] border-l-amber-500" },
+  LOW: { label: "Low", dot: "bg-yellow-500", text: "text-yellow-700", badge: "border-yellow-600/40 bg-yellow-500/[0.08] text-yellow-800", card: "bg-yellow-500/[0.07] border-l-yellow-500" },
+  NONE: { label: "None", dot: "bg-stone-400", text: "text-stone-500", badge: "border-stone-400/40 bg-stone-400/15 text-stone-700", card: "bg-stone-400/[0.06] border-l-stone-400" },
 };
 
 function decorate(c) {
   if (c.kind === "filler") {
-    return { ...c, textContent: c.content.trim(), text: "text-stone-500", dot: "bg-stone-700", badge: "", activeCard: "", riskLabel: "" };
+    return { ...c, textContent: c.content.trim(), text: "text-stone-500", dot: "bg-stone-400", badge: "", activeCard: "", riskLabel: "" };
   }
   const s = RISK_STYLE[c.risk] || RISK_STYLE.NONE;
   return {
