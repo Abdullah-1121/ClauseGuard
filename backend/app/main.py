@@ -36,11 +36,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# CORS is not a security boundary here: the API is stateless and BYOK (every
+# POST carries its own key), so allow any origin by default and let callers
+# tighten via CLAUSEGUARD_CORS_ORIGINS if they proxy it behind auth.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         o.strip()
-        for o in os.environ.get("CLAUSEGUARD_CORS_ORIGINS", "http://localhost:3000").split(",")
+        for o in os.environ.get("CLAUSEGUARD_CORS_ORIGINS", "*").split(",")
         if o.strip()
     ],
     allow_methods=["*"],

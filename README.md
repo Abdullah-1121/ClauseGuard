@@ -274,7 +274,8 @@ Deploy env vars:
 - `CLAUSEGUARD_DAILY_TOKEN_BUDGET` — hard daily token cap, server mode only (see above).
 - `CLAUSEGUARD_MAX_REVIEW_CHARS` — per-review content cap (default 100k).
 - `CLAUSEGUARD_DB_PATH` — points the SQLite job store somewhere persistent if you want jobs to survive redeploys (default `clauseguard.db` on the container's scratch disk).
-- `CLAUSEGUARD_CORS_ORIGINS` — comma-separated origins; only needed if you host the UI separately (set `VITE_API_BASE_URL` on the frontend to match).
+- `CLAUSEGUARD_CORS_ORIGINS` — comma-separated allowed origins. Defaults to `*`: the API is stateless + BYOK, so any origin calling it is equivalent to someone curling it (CORS is not an auth boundary here). Set it if you proxy the API behind browser-identity auth.
+- `VITE_API_BASE_URL` — optional. Production frontend builds default to the live backend (`https://clauseguard.fastapicloud.dev`); dev uses the Vite proxy. Only set it to point a build at a different backend.
 
 The live deployment is a **FastAPI Cloud** service (`fastapi run ./app/main.py`,
 which is why `fastapi[standard]` is the pinned dep); the same single-image

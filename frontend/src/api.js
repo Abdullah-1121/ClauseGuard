@@ -4,7 +4,9 @@
 //
 // Bring-your-own-key: the caller's provider/api_key/model travel in the POST
 // body and are held in localStorage (never the server's key). In dev the Vite
-// proxy forwards /v1/* to FastAPI; for a deployed backend set VITE_API_BASE_URL.
+// proxy forwards /v1/* to FastAPI so the origin stays empty; any production
+// build without VITE_API_BASE_URL defaults to the deployed backend so the
+// static host never has to answer /v1/* itself.
 
 const CONFIG_KEY = "clauseguard-config";
 
@@ -20,7 +22,8 @@ export function saveConfig(config) {
   localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
 }
 
-const BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+const BASE =
+  import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? "" : "https://clauseguard.fastapicloud.dev");
 
 export async function fetchModels() {
   const res = await fetch(`${BASE}/v1/models`);
