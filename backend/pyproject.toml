@@ -28,6 +28,12 @@ dev = [
 [tool.uv]
 package = false
 
+[tool.setuptools.packages.find]
+# The distribution ships the `app` package tree; `evals` is local dev tooling.
+# Without this, setuptools' editable build (used by FastAPI Cloud) aborts on
+# multi-package flat layout discovery.
+include = ["app", "app.*"]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 asyncio_mode = "auto"
