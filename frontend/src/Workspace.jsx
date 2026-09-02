@@ -48,6 +48,11 @@ function Strip({ result, deviations, onReset, count }) {
       <Metric label="Compliant" value={(result.clause_count || 0) - deviations} />
       <div className="ml-auto flex items-center gap-4">
         <span className="font-mono text-[11px] text-stone-500">
+          {result.usage?.input_tokens + result.usage?.output_tokens
+            ? `${result.usage.input_tokens + result.usage.output_tokens} tok`
+            : "--"}
+        </span>
+        <span className="font-mono text-[11px] text-stone-500">
           {result.usage?.latency_ms ? `${Math.round(result.usage.latency_ms)} ms` : "--"}
         </span>
         <span className="font-mono text-[11px] text-stone-600">

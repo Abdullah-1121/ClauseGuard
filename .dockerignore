@@ -1,0 +1,12 @@
+.git
+**/__pycache__
+**/*.py[cod]
+**/.venv
+**/node_modules
+**/dist
+backend/evals/datasets/cuad
+backend/evals/reports
+backend/.env
+**/*.db
+brag-output
+.opencode

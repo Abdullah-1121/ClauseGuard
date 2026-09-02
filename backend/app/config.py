@@ -37,9 +37,7 @@ class Settings(BaseSettings):
     openrouter_base_url: str = Field(
         "https://openrouter.ai/api/v1", validation_alias="OPENROUTER_BASE_URL"
     )
-    ollama_base_url: str = Field(
-        "http://localhost:11434/v1", validation_alias="OLLAMA_BASE_URL"
-    )
+    ollama_base_url: str = Field("http://localhost:11434/v1", validation_alias="OLLAMA_BASE_URL")
 
     # Guardrails
     confidence_threshold: float = 0.55
@@ -56,6 +54,15 @@ class Settings(BaseSettings):
 
     # API auth
     api_keys: str = "dev-local-key"  # comma-separated
+    rate_limit_per_minute: int = 10
+
+    # Spend protection (for public deploys — a leaked key must not drain the
+    # provider quota). 0 disables each guard.
+    daily_token_budget: int = 0
+    max_review_chars: int = 100_000
+
+    # Job store
+    db_path: str = "clauseguard.db"
 
     @property
     def allowed_api_keys(self) -> set[str]:

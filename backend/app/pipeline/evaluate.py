@@ -11,6 +11,7 @@ import asyncio
 
 from pydantic_ai import Agent
 from pydantic_ai.exceptions import ModelHTTPError
+from pydantic_ai.usage import RunUsage
 
 from app.models.schemas import Clause, EvaluationOutput, PlaybookRule
 from app.obs.langfuse import observe
@@ -32,7 +33,7 @@ evaluator_agent = Agent(
 
 
 @observe(name="evaluate_clause", as_type="generation")
-async def evaluate_clause(clause: Clause, rule: PlaybookRule) -> EvaluationOutput:
+async def evaluate_clause(clause: Clause, rule: PlaybookRule) -> tuple[EvaluationOutput, RunUsage]:
     prompt = (
         f"Category: {rule.category.value}\n"
         f"Buyer's standard position: {rule.standard_position}\n\n"
@@ -49,4 +50,4 @@ async def evaluate_clause(clause: Clause, rule: PlaybookRule) -> EvaluationOutpu
                 delay = min(delay * 2, 60.0)
                 continue
             raise
-    return result.output
+    return result.output, result.usage

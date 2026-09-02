@@ -4,7 +4,7 @@
 
 ClauseGuard is an AI-engineering showcase of one idea: *an LLM is a probabilistic judge, and the surrounding system has to make it dependable.* It turns a contract's clauses into ranked, citation-grounded, confidence-scored risk findings — and, when it isn't sure, escalates to a human instead of overclaiming.
 
-> **Status:** MVP complete. The pipeline works end-to-end, the eval harness is validated against real CUAD contract data, 34/34 tests pass, `ruff` and `mypy` are clean, and everything runs on a free-tier LLM key. See [specs/](./specs/) for the engineering record and [AGENTS.md](./AGENTS.md) for the full design process.
+> **Status:** MVP complete. The pipeline works end-to-end, the eval harness is validated against real CUAD contract data, 53/53 tests pass, `ruff` and `mypy` are clean, and everything runs on a free-tier LLM key. See [specs/](./specs/) for the engineering record and [AGENTS.md](./AGENTS.md) for the full design process.
 
 ---
 
@@ -189,19 +189,73 @@ npm install && npm run dev
 
 ## API
 
+Reviews are **async**: `POST` queues a job and returns a `review_id` (HTTP 202);
+poll `GET /v1/reviews/{id}` until it reaches `completed` (with `result`) or
+`failed` (with `error`). Jobs persist in `clauseguard.db` (SQLite;
+`CLAUSEGUARD_DB_PATH`).
+
 ```bash
-# Review plain text
+# Queue a plain-text review
 curl -X POST localhost:8000/v1/reviews \
   -H 'X-API-Key: dev-local-key' -H 'Content-Type: application/json' \
   -d '{"text": "1. Limitation of Liability. Vendor liability shall be unlimited."}'
+# → {"review_id": "...", "status": "pending"}
 
-# Review an uploaded contract (digital PDF or DOCX)
+# Queue an uploaded contract (digital PDF or DOCX)
 curl -X POST localhost:8000/v1/reviews/file \
   -H 'X-API-Key: dev-local-key' \
   -F 'file=@contract.docx'
+
+# Poll for the result (also: 404 if the id is unknown)
+curl -X GET localhost:8000/v1/reviews/<review_id> -H 'X-API-Key: dev-local-key'
 ```
 
 Auth via the `X-API-Key` header (dev default `dev-local-key`, configurable via `CLAUSEGUARD_API_KEYS`).
+Each key is rate-limited to `CLAUSEGUARD_RATE_LIMIT_PER_MINUTE` requests/minute (in-memory window; default 10, 0 disables).
+
+**Spend protection (for public deploys):** on a public site the key ships in the
+page's JavaScript, so it is *not* security — anyone can read it. Two service-wide
+guards protect your provider quota regardless of key:
+- `CLAUSEGUARD_DAILY_TOKEN_BUDGET` — every completed review accrues its input+output
+  tokens (SQLite `token_budget` table); once the day's total reaches the budget,
+  new submissions get `429` until the next UTC day. This is the hard stop that
+  actually protects the quota. `0` disables.
+- `CLAUSEGUARD_MAX_REVIEW_CHARS` — reject content over N characters before a single
+  request can burn the whole budget (default 100k; `0` disables).
+
+---
+
+## Deploy
+
+The root `Dockerfile` builds the frontend and backend into **one image** that
+serves both the UI and the API. It works on Railway/Fly.io/Render, and is the
+canonical path for **Hugging Face Spaces (Docker Space)** — put the repo in a
+Space, set the env vars as Space *secrets*, and give it a CPU + a bit of RAM
+(the frontend build needs ~2GB to compile).
+
+```bash
+# generic
+docker build -t clauseguard .
+docker run -p 8000:8000 -e GROQ_API_KEY=... -e CLAUSEGUARD_API_KEYS=dev-local-key clauseguard
+```
+
+HF Spaces specifics:
+- The container listens on `$PORT` (7860 on Spaces; the Dockerfile defaults there too).
+- Set `GROQ_API_KEY`, `CLAUSEGUARD_API_KEYS=dev-local-key`, and
+  `CLAUSEGUARD_DAILY_TOKEN_BUDGET` (e.g. `20000`) in the Space's Settings → Secrets
+  so a public visitor cannot drain your free-tier quota.
+- The SQLite job store (`clauseguard.db`) lives on the container's ephemeral disk
+  and is wiped on restart — acceptable for a demo; jobs do not survive redeploys.
+- Make the Space **private** if it's a portfolio demo — that alone is the
+  strongest quota protection and needs no code.
+
+Deploy env vars:
+- `GROQ_API_KEY` (or the key for your configured provider) — required.
+- `CLAUSEGUARD_API_KEYS` — must include the key the UI sends (`dev-local-key` by default).
+- `CLAUSEGUARD_DAILY_TOKEN_BUDGET` — hard daily token cap (see above).
+- `CLAUSEGUARD_MAX_REVIEW_CHARS` — per-review content cap (default 100k).
+- `CLAUSEGUARD_DB_PATH` — points the SQLite job store somewhere persistent if you want jobs to survive redeploys (default `clauseguard.db` on the container's scratch disk).
+- `CLAUSEGUARD_CORS_ORIGINS` — comma-separated origins; only needed if you host the UI separately.
 
 ---
 
@@ -209,7 +263,7 @@ Auth via the `X-API-Key` header (dev default `dev-local-key`, configurable via `
 
 - **`specs/`** — requirements, design, and execution plan (the spec-driven workflow).
 - **`AGENTS.md`** — the full design process: hard-won lessons, architectural decisions, honest limitations.
-- **`backend/tests/`** — 34 tests covering the guardrails, metrics math, risk rules, parse/segment, pipeline, and file ingestion.
+- **`backend/tests/`** — 56 tests covering the guardrails, metrics math, risk rules, parse/segment, pipeline, file ingestion, HTTP endpoints (auth/404/413/415/rate-limit/budget), and the review job store.
 - **CI** — `ruff` lint, `mypy` type-check, `pytest` on every push/PR (`continue-on-error` on mypy while types stabilize).
 
 ### Notable decisions

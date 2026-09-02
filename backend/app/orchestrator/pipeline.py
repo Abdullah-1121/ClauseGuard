@@ -2,8 +2,10 @@
 
 Deliberately a plain, readable async function rather than a heavyweight graph
 framework: segment -> classify -> match rule -> evaluate -> guardrail -> assemble.
-Every reviewed clause is traced. Token/cost accounting is wired at the `span`
-seam and expanded in a later milestone (see SPEC §9.4).
+Every reviewed clause is traced; token/cost usage from both model calls is
+accumulated into the returned `UsageStats`. Cost is only filled when the model
+back-end reports a price (pydantic-ai knows Groq/Cerebras pricing); otherwise
+it stays 0 with the token counts still accurate.
 """
 
 from __future__ import annotations
@@ -35,15 +37,23 @@ async def review_contract(
 
     clauses = segment(text)
     findings: list[Finding] = []
+    input_tokens = output_tokens = 0
+    estimated_cost_usd = 0.0
 
     for clause in clauses:
         with span("clause.review", clause_index=clause.index):
-            classification = await classify_clause(clause)
+            classification, classify_usage = await classify_clause(clause)
+            input_tokens += classify_usage.input_tokens
+            output_tokens += classify_usage.output_tokens
+            estimated_cost_usd += classify_usage.cost or 0.0
             rule = playbook.rule_for(classification.category)
             if rule is None:
                 continue  # clause type not covered by this playbook
 
-            evaluation = await evaluate_clause(clause, rule)
+            evaluation, evaluate_usage = await evaluate_clause(clause, rule)
+            input_tokens += evaluate_usage.input_tokens
+            output_tokens += evaluate_usage.output_tokens
+            estimated_cost_usd += evaluate_usage.cost or 0.0
 
             citation = Citation(start=clause.start, end=clause.end, text=clause.text)
             if not verify_citation(text, citation):
@@ -68,7 +78,12 @@ async def review_contract(
             )
 
     findings.sort(key=lambda f: (f.risk_level.rank, f.confidence), reverse=True)
-    usage = UsageStats(latency_ms=round((time.perf_counter() - started) * 1000, 2))
+    usage = UsageStats(
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        estimated_cost_usd=round(estimated_cost_usd, 6),
+        latency_ms=round((time.perf_counter() - started) * 1000, 2),
+    )
     return ReviewResult(
         playbook_id=playbook.id,
         clause_count=len(clauses),

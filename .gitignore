@@ -23,6 +23,7 @@ backend/evals/datasets/cuad/
 *.pdf
 *.docx
 !backend/evals/datasets/sample/**
+*.db
 
 # Node / frontend
 node_modules/

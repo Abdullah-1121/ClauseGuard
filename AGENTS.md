@@ -1,6 +1,6 @@
 # AGENTS.md - ClauseGuard Engineering & Pedagogy Protocol
 
-## 0. Project Status (Last Updated: 2026-08-31)
+## 0. Project Status (Last Updated: 2026-09-02)
 
 ### Status: MVP COMPLETE — harness validated with real eval numbers
 
@@ -9,8 +9,13 @@
 2. **Eval harness** (`backend/evals/`): CUAD ingestion (510 contracts, 467 with playbook-relevant clauses, 2387 gold labels), rule-based risk labeling (12 categories, default-to-deviation), 5 metrics.
 3. **4 opencode skills** in `.opencode/skills/` (socratic-architect, adversarial-reviewer, postmortem-debugger, feynman-validator); `opencode.json` wires AGENTS.md.
 4. **Specs**: `specs/requirements.md`, `specs/design.md`, `specs/tasks.md`.
-5. **Tests**: 34/34 passing; ruff clean; mypy clean (29 files).
-6. **File ingestion** (`app/pipeline/ingest.py` + `POST /v1/reviews/file`): PDF (pypdf) + DOCX (stdlib `zipfile`/`xml.etree`, no `python-docx`) → plain text, feeding the same segmenter. Scanned PDFs / unknown types / corrupt files fail loudly as 415 before any token spend. Adversarial-hardened: raw parse errors logged server-side, clean user message; upload file always closed via `finally`.
+5. **Tests**: 56/56 passing; ruff clean; mypy clean (34 files).
+6. **API hardening**: 11 HTTP endpoint tests (`tests/test_routes.py`) via in-loop httpx/ASGITransport covering auth (401), 404, 413, 415, and grounded-findings happy paths. **Per-key rate limiting** (sliding 60s window, in-memory, stdlib-only) enforced on all `/v1/*` routes via `Depends(rate_limit)`; `CLAUSEGUARD_RATE_LIMIT_PER_MINUTE` (0 = off) in `.env.example`. # ponytail: single-process limiter; move to Redis if multi-worker.
+7. **File ingestion** (`app/pipeline/ingest.py` + `POST /v1/reviews/file`): PDF (pypdf) + DOCX (stdlib `zipfile`/`xml.etree`, no `python-docx`) → plain text, feeding the same segmenter. Scanned PDFs / unknown types / corrupt files fail loudly as 415 before any token spend. Adversarial-hardened: raw parse errors logged server-side, clean user message; upload file always closed via `finally`.
+8. **Token accounting**: `classify_clause`/`evaluate_clause` now return `(output, RunUsage)`; the orchestrator accumulates input/output tokens and cost (cost fills only when the model back-end prices tokens) into `UsageStats`, surfaced by the API and displayed in the frontend strip.
+9. **Async reviews + polling**: `POST /v1/reviews` and `/v1/reviews/file` now queue a job (202 + `review_id`) and run the pipeline as an in-process background task; `GET /v1/reviews/{id}` polls `pending/running/completed/failed`, rehydrating the stored result. Jobs persist in a stdlib-SQLite `ReviewStore` (`app/store.py`, `CLAUSEGUARD_DB_PATH`) — schema created on startup, `tests/test_store.py` covers the lifecycle. The frontend now submits and polls. # ponytail: single-process executor + sqlite; a worker pool + the compose Postgres is the upgrade path.
+10. **Single-container deploy**: root `Dockerfile` (node stage builds `frontend/dist`, python stage serves it from FastAPI via a catch-all static mount registered after the API routes) — one image for Railway/Fly/Render; listens on `$PORT` (7860 default) for HF Spaces. Runtime knobs `CLAUSEGUARD_STATIC_DIR` and `CLAUSEGUARD_CORS_ORIGINS`; `README.md` Deploy section documents the env vars.
+11. **Spend protection for public deploys**: on a public Space the API key ships in the page's JS, so it is NOT security. Two service-wide guards (independent of keys): `CLAUSEGUARD_DAILY_TOKEN_BUDGET` is a hard daily input+output token cap — completed reviews accrue spend into SQLite `token_budget`, once reached all `/v1/reviews*` submissions get 429 until the next UTC day; `CLAUSEGUARD_MAX_REVIEW_CHARS` rejects over-long content before a single token burns. Both default off (0). # ponytail: read-then-add is non-atomic, a concurrent burst can overshoot by a request or two; the per-key limiter keeps that bounded.
 
 ### Real Eval Numbers (Groq free tier, dev split, 2 contracts, 100 clauses each)
 | Metric | Detection only | Full eval |

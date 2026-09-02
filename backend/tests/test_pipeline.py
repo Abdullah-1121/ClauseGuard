@@ -24,6 +24,10 @@ async def test_review_runs_end_to_end_without_network():
     # Every emitted finding must carry a grounded, verifiable citation.
     for finding in result.findings:
         assert CONTRACT[finding.citation.start : finding.citation.end] == finding.citation.text
+    # Both model calls (classify + evaluate) must surface their token usage.
+    assert result.usage.input_tokens > 0
+    assert result.usage.output_tokens > 0
+    assert result.usage.latency_ms >= 0
 
 
 def test_retryable_errors_only_include_rate_limits_and_parse_failures():
@@ -32,11 +36,7 @@ def test_retryable_errors_only_include_rate_limits_and_parse_failures():
 
     assert classify.is_retryable_model_error(err(413, {"error": {"code": "rate_limit_exceeded"}}))
     assert classify.is_retryable_model_error(err(429))
-    assert classify.is_retryable_model_error(
-        err(400, {"error": {"code": "output_parse_failed"}})
-    )
+    assert classify.is_retryable_model_error(err(400, {"error": {"code": "output_parse_failed"}}))
     assert not classify.is_retryable_model_error(err(400, {"error": {"code": "invalid_request"}}))
-    assert not classify.is_retryable_model_error(
-        err(404, {"error": {"code": "model_not_found"}})
-    )
+    assert not classify.is_retryable_model_error(err(404, {"error": {"code": "model_not_found"}}))
     assert not classify.is_retryable_model_error(err(500))

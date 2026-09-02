@@ -119,7 +119,7 @@ async def _predict_full(
         rule_status, rule_risk = rule_evaluate(clause.text, label.category.value)
 
         # LLM evaluation
-        llm_eval = await evaluate_clause(clause, rule)
+        llm_eval, _ = await evaluate_clause(clause, rule)
 
         clause_details.append({
             "category": label.category.value,

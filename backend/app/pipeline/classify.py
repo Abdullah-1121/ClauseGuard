@@ -11,6 +11,7 @@ import asyncio
 
 from pydantic_ai import Agent
 from pydantic_ai.exceptions import ModelHTTPError
+from pydantic_ai.usage import RunUsage
 
 from app.models.enums import ClauseCategory
 from app.models.schemas import ClassificationOutput, Clause, ClauseLabel
@@ -34,9 +35,9 @@ classifier_agent = Agent(
 
 
 @observe(name="classify_clause", as_type="generation")
-async def classify_clause(clause: Clause) -> ClassificationOutput:
+async def classify_clause(clause: Clause) -> tuple[ClassificationOutput, RunUsage]:
     result = await classifier_agent.run(clause.text)
-    return result.output
+    return result.output, result.usage
 
 
 # ── Batched classification ──────────────────────────────────────────────────
