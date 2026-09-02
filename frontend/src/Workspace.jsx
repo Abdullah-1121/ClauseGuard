@@ -31,6 +31,7 @@ export default function Workspace({ result, source, activeIndex, setActiveIndex,
             text={source}
             findings={findings}
             activeIndex={activeIndex}
+            onSelect={setActiveIndex}
           />
         ) : (
           <EmptyDoc note="Uploaded file — source text unavailable to highlight." />

@@ -5,7 +5,10 @@ export default function FindingsPanel({ findings, activeIndex, onSelect }) {
   if (findings.length === 0) {
     return (
       <aside className="border-r border-hairline bg-ink-900 p-6">
-        <p className="font-mono text-xs text-stone-600">No findings flagged.</p>
+        <p className="font-mono text-xs text-stone-500">No deviations flagged.</p>
+        <p className="mt-1.5 text-xs leading-relaxed text-stone-600">
+          Every clause was checked against the playbook — nothing needed a redline.
+        </p>
       </aside>
     );
   }

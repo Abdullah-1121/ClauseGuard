@@ -101,7 +101,7 @@ function InputCard({
 }) {
   const gated = !ready;
   return (
-    <div className="rounded-md border border-hairline bg-ink-900">
+    <div className="machined rounded-[4px] border border-hairline bg-ink-900">
       <div className="flex items-center gap-1 border-b border-hairline px-4 py-2">
         <Tab active={view === "text"} onClick={() => setView("text")}>
           Paste text

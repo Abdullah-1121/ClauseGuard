@@ -5,11 +5,18 @@ import { useEffect, useMemo, useRef } from "react";
 //     so the reader sees exactly which clause the selected finding refers to.
 //   - selecting a finding auto-scrolls the document to that clause.
 //   - the "clause map" dots (top) reflect each clause's risk and jump to it.
+//   - clicking a clause (from the map or the card) selects its finding — the
+//     sync runs both ways.
 
-export default function DocumentPane({ text, findings, activeIndex }) {
+export default function DocumentPane({ text, findings, activeIndex, onSelect }) {
   const markRefs = useRef([]);
 
   const clauses = useMemo(() => buildClauses(text, findings), [text, findings]);
+
+  const jump = (idx) => {
+    onSelect?.(idx);
+    markRefs.current[idx]?.scrollIntoView({ block: "center", behavior: "smooth" });
+  };
 
   useEffect(() => {
     const el = markRefs.current[activeIndex];
@@ -26,7 +33,7 @@ export default function DocumentPane({ text, findings, activeIndex }) {
           {clauses.filter((c) => c.kind === "clause").map((c, i) => (
             <button
               key={c.findIdx}
-              onClick={() => markRefs.current[c.findIdx]?.scrollIntoView({ block: "center", behavior: "smooth" })}
+              onClick={() => jump(c.findIdx)}
               className={`flex items-center gap-1 rounded-[2px] border px-1.5 py-0.5 transition-colors ${
                 c.findIdx === activeIndex ? c.badge + " ring-1 ring-white/30" : "border-transparent opacity-70 hover:opacity-100"
               }`}
@@ -52,8 +59,12 @@ export default function DocumentPane({ text, findings, activeIndex }) {
             <div
               key={i}
               ref={(el) => (c.kind === "clause" ? (markRefs.current[c.findIdx] = el) : null)}
+              onClick={() => (c.kind === "clause" ? jump(c.findIdx) : null)}
+              title={c.kind === "clause" ? `Select finding #${c.findIdx + 1}` : undefined}
               className={`mb-3 rounded-[4px] border-l-2 py-3 pl-3 pr-2 ${
-                c.findIdx === activeIndex ? c.activeCard : "border-l-transparent"
+                c.kind === "clause"
+                  ? `cursor-pointer transition-colors ${c.findIdx === activeIndex ? c.activeCard : "border-l-transparent hover:bg-white/[0.015]"}`
+                  : "border-l-transparent"
               }`}
             >
               <div className="mb-1 flex items-center gap-2">
