@@ -2,7 +2,6 @@
 name = "clauseguard"
 version = "0.1.0"
 description = "Reliability-engineered AI contract review agent"
-readme = "../README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi>=0.115",
