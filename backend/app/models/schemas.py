@@ -96,6 +96,11 @@ class UsageStats(BaseModel):
 class ReviewRequest(BaseModel):
     text: str
     playbook_id: str = "vendor_saas_buyer"
+    # Bring-your-own-key: when all three are set, the review runs on the
+    # caller's provider key + model and skips the server X-API-Key / budget.
+    provider: str | None = None
+    api_key: str | None = None
+    model: str | None = None
 
 
 class ReviewResult(BaseModel):

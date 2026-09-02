@@ -2,6 +2,8 @@
 // input. The three value props hardcode the product thesis — keep in sync with
 // README. Designed as a focused center panel, not a marketing page.
 
+import ConfigCard, { configReady } from "./ConfigCard.jsx";
+
 const VALUE_PROPS = [
   {
     title: "Grounded citations",
@@ -27,7 +29,11 @@ export default function Landing({
   onFile,
   isLoading,
   error,
+  config,
+  onConfigChange,
+  catalog,
 }) {
+  const ready = configReady(config, catalog);
   return (
     <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-8 docs-scroll">
       <div className="w-full max-w-2xl">
@@ -42,17 +48,22 @@ export default function Landing({
           </p>
         </div>
 
-        <InputCard
-          view={view}
-          setView={setView}
-          text={text}
-          setText={setText}
-          fileRef={fileRef}
-          onText={onText}
-          onFile={onFile}
-          isLoading={isLoading}
-          error={error}
-        />
+        <ConfigCard config={config} onChange={onConfigChange} catalog={catalog} />
+
+        <div className="mt-4">
+          <InputCard
+            view={view}
+            setView={setView}
+            text={text}
+            setText={setText}
+            fileRef={fileRef}
+            onText={onText}
+            onFile={onFile}
+            isLoading={isLoading}
+            error={error}
+            ready={ready}
+          />
+        </div>
 
         <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
           {VALUE_PROPS.map((v, i) => (
@@ -76,7 +87,19 @@ export default function Landing({
   );
 }
 
-function InputCard({ view, setView, text, setText, fileRef, onText, onFile, isLoading, error }) {
+function InputCard({
+  view,
+  setView,
+  text,
+  setText,
+  fileRef,
+  onText,
+  onFile,
+  isLoading,
+  error,
+  ready,
+}) {
+  const gated = !ready;
   return (
     <div className="rounded-md border border-hairline bg-ink-900">
       <div className="flex items-center gap-1 border-b border-hairline px-4 py-2">
@@ -109,7 +132,7 @@ function InputCard({ view, setView, text, setText, fileRef, onText, onFile, isLo
             </span>
             <RunButton
               onClick={onText}
-              disabled={isLoading || !text.trim()}
+              disabled={isLoading || gated || !text.trim()}
               loading={isLoading}
             >
               Run audit
@@ -118,16 +141,27 @@ function InputCard({ view, setView, text, setText, fileRef, onText, onFile, isLo
         </div>
       ) : (
         <div className="p-4">
-          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-[4px] border border-dashed border-white/15 bg-ink-800 px-4 py-10 text-center hover:border-white/30">
+          <label
+            className={`flex cursor-pointer flex-col items-center gap-2 rounded-[4px] border border-dashed px-4 py-10 text-center ${
+              gated
+                ? "border-white/10 bg-ink-800/50"
+                : "border-white/15 bg-ink-800 hover:border-white/30"
+            }`}
+          >
             <input
               ref={fileRef}
               type="file"
               accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               className="hidden"
+              disabled={gated}
               onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
             />
             <span className="text-sm text-stone-300">
-              {isLoading ? "Auditing…" : "Drop a contract here, or click to browse"}
+              {isLoading
+                ? "Auditing…"
+                : gated
+                  ? "Enter your API key above to unlock"
+                  : "Drop a contract here, or click to browse"}
             </span>
             <span className="font-mono text-[11px] text-stone-600">
               .pdf · .docx — digital files only

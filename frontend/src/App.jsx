@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
-import { reviewFile, reviewText } from "./api.js";
+import { useEffect, useRef, useState } from "react";
+import { fetchModels, loadConfig, reviewFile, reviewText, saveConfig } from "./api.js";
+import ConfigCard, { DEFAULT_CATALOG } from "./ConfigCard.jsx";
 import Landing from "./Landing.jsx";
 import Workspace from "./Workspace.jsx";
 
@@ -12,16 +13,34 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [runId, setRunId] = useState(0);
+  const [config, setConfig] = useState(loadConfig);
+  const [catalog, setCatalog] = useState(DEFAULT_CATALOG);
   const fileRef = useRef(null);
+
+  useEffect(() => {
+    // Best-effort: replace the built-in catalog when the backend exposes one.
+    // Any failure (offline, older deploy) gracefully falls back to the default.
+    fetchModels()
+      .then((res) => res.providers && setCatalog(res.providers))
+      .catch(() => {});
+  }, []);
+
+  function updateConfig(patch) {
+    setConfig((prev) => {
+      const next = { ...prev, ...patch };
+      saveConfig(next);
+      return next;
+    });
+  }
 
   async function runText() {
     if (!text.trim()) return;
-    await run(() => reviewText(text), text);
+    await run(() => reviewText(text, config), text);
   }
 
   async function runFile(file) {
     if (!file) return;
-    await run(() => reviewFile(file), "");
+    await run(() => reviewFile(file, config), "");
   }
 
   async function run(call, sourceText) {
@@ -56,6 +75,9 @@ export default function App() {
           onFile={runFile}
           isLoading={isLoading}
           error={error}
+          config={config}
+          onConfigChange={updateConfig}
+          catalog={catalog}
         />
       ) : (
         <Workspace

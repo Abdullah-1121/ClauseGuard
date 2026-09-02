@@ -4,7 +4,7 @@
 
 ClauseGuard is an AI-engineering showcase of one idea: *an LLM is a probabilistic judge, and the surrounding system has to make it dependable.* It turns a contract's clauses into ranked, citation-grounded, confidence-scored risk findings — and, when it isn't sure, escalates to a human instead of overclaiming.
 
-> **Status:** MVP complete. The pipeline works end-to-end, the eval harness is validated against real CUAD contract data, 53/53 tests pass, `ruff` and `mypy` are clean, and everything runs on a free-tier LLM key. See [specs/](./specs/) for the engineering record and [AGENTS.md](./AGENTS.md) for the full design process.
+> **Status:** MVP complete. The pipeline works end-to-end, the eval harness is validated against real CUAD contract data, 59/59 tests pass, `ruff` and `mypy` are clean, and everything runs on a free-tier LLM key. See [specs/](./specs/) for the engineering record and [AGENTS.md](./AGENTS.md) for the full design process.
 
 ---
 
@@ -194,34 +194,53 @@ poll `GET /v1/reviews/{id}` until it reaches `completed` (with `result`) or
 `failed` (with `error`). Jobs persist in `clauseguard.db` (SQLite;
 `CLAUSEGUARD_DB_PATH`).
 
+**Two ways to run a review:** on the *server's* configured models (needs a valid
+`X-API-Key`), or **bring-your-own-key** — send `provider` + `api_key` + `model`
+in the body and the review runs on *your* key, your model, *your* quota. BYOK
+skips the server key and the daily token budget.
+
 ```bash
-# Queue a plain-text review
+# Model catalog for the UI (also handy for scripting)
+curl localhost:8000/v1/models
+# → {"providers": {"groq": {"models": [...]}, "openrouter": {"models": [...]}}}
+
+# BYOK — your key, your model (no X-API-Key needed)
+curl -X POST localhost:8000/v1/reviews \
+  -H 'Content-Type: application/json' \
+  -d '{"text": "1. Limitation of Liability. Vendor liability shall be unlimited.",
+       "provider": "groq", "api_key": "<yours>", "model": "llama-3.3-70b-versatile"}'
+# → {"review_id": "...", "status": "pending"}
+
+# Server key — runs on the server's configured models
 curl -X POST localhost:8000/v1/reviews \
   -H 'X-API-Key: dev-local-key' -H 'Content-Type: application/json' \
   -d '{"text": "1. Limitation of Liability. Vendor liability shall be unlimited."}'
-# → {"review_id": "...", "status": "pending"}
 
-# Queue an uploaded contract (digital PDF or DOCX)
+# Queue an uploaded contract (digital PDF or DOCX) — same BYOK field contract,
+# sent as multipart form fields
 curl -X POST localhost:8000/v1/reviews/file \
-  -H 'X-API-Key: dev-local-key' \
-  -F 'file=@contract.docx'
+  -F 'file=@contract.docx' -F 'provider=groq' -F 'api_key=<yours>' -F 'model=llama-3.3-70b-versatile'
 
-# Poll for the result (also: 404 if the id is unknown)
-curl -X GET localhost:8000/v1/reviews/<review_id> -H 'X-API-Key: dev-local-key'
+# Poll for the result (open, rate-limited)
+curl -X GET localhost:8000/v1/reviews/<review_id>
 ```
 
-Auth via the `X-API-Key` header (dev default `dev-local-key`, configurable via `CLAUSEGUARD_API_KEYS`).
-Each key is rate-limited to `CLAUSEGUARD_RATE_LIMIT_PER_MINUTE` requests/minute (in-memory window; default 10, 0 disables).
+`POST /v1/reviews*` requires **either** a valid `X-API-Key` (server mode) **or**
+`provider`/`api_key`/`model` together (BYOK); anything else is `401`, and a
+half-filled BYOK combo is `400`. `GET /v1/models`, `GET /v1/playbooks`, and
+`GET /v1/reviews/{id}` are open but rate-limited by client IP
+(`CLAUSEGUARD_RATE_LIMIT_PER_MINUTE`; in-memory window, default 10, 0 disables).
+The frontend stores your key in localStorage and only ever sends it inside one
+review POST.
 
-**Spend protection (for public deploys):** on a public site the key ships in the
-page's JavaScript, so it is *not* security — anyone can read it. Two service-wide
-guards protect your provider quota regardless of key:
-- `CLAUSEGUARD_DAILY_TOKEN_BUDGET` — every completed review accrues its input+output
-  tokens (SQLite `token_budget` table); once the day's total reaches the budget,
-  new submissions get `429` until the next UTC day. This is the hard stop that
-  actually protects the quota. `0` disables.
+**Spend protection (server mode only):** with BYOK the caller pays, so the
+server's daily quota is untouchable by construction. For server-funded runs two
+guards protect your provider quota:
+- `CLAUSEGUARD_DAILY_TOKEN_BUDGET` — completed server-funded reviews accrue their
+  input+output tokens (SQLite `token_budget` table); once the day's total reaches
+  the budget, new submissions get `429` until the next UTC day. `0` disables.
 - `CLAUSEGUARD_MAX_REVIEW_CHARS` — reject content over N characters before a single
-  request can burn the whole budget (default 100k; `0` disables).
+  request can burn the whole budget (default 100k; `0` disables). Applies to both modes.
 
 ---
 
@@ -250,12 +269,16 @@ HF Spaces specifics:
   strongest quota protection and needs no code.
 
 Deploy env vars:
-- `GROQ_API_KEY` (or the key for your configured provider) — required.
-- `CLAUSEGUARD_API_KEYS` — must include the key the UI sends (`dev-local-key` by default).
-- `CLAUSEGUARD_DAILY_TOKEN_BUDGET` — hard daily token cap (see above).
+- `GROQ_API_KEY` (or `OPENROUTER_API_KEY`) — used for **server mode** reviews; BYOK callers never touch it.
+- `CLAUSEGUARD_API_KEYS` — accepted `X-API-Key` values for server mode (`dev-local-key` by default).
+- `CLAUSEGUARD_DAILY_TOKEN_BUDGET` — hard daily token cap, server mode only (see above).
 - `CLAUSEGUARD_MAX_REVIEW_CHARS` — per-review content cap (default 100k).
 - `CLAUSEGUARD_DB_PATH` — points the SQLite job store somewhere persistent if you want jobs to survive redeploys (default `clauseguard.db` on the container's scratch disk).
-- `CLAUSEGUARD_CORS_ORIGINS` — comma-separated origins; only needed if you host the UI separately.
+- `CLAUSEGUARD_CORS_ORIGINS` — comma-separated origins; only needed if you host the UI separately (set `VITE_API_BASE_URL` on the frontend to match).
+
+The live deployment is a **FastAPI Cloud** service (`fastapi run ./app/main.py`,
+which is why `fastapi[standard]` is the pinned dep); the same single-image
+Dockerfile is the source for that build.
 
 ---
 
@@ -263,7 +286,7 @@ Deploy env vars:
 
 - **`specs/`** — requirements, design, and execution plan (the spec-driven workflow).
 - **`AGENTS.md`** — the full design process: hard-won lessons, architectural decisions, honest limitations.
-- **`backend/tests/`** — 56 tests covering the guardrails, metrics math, risk rules, parse/segment, pipeline, file ingestion, HTTP endpoints (auth/404/413/415/rate-limit/budget), and the review job store.
+- **`backend/tests/`** — 59 tests covering the guardrails, metrics math, risk rules, parse/segment, pipeline, file ingestion, HTTP endpoints (auth/404/413/415/rate-limit/budget/BYOK), and the review job store.
 - **CI** — `ruff` lint, `mypy` type-check, `pytest` on every push/PR (`continue-on-error` on mypy while types stabilize).
 
 ### Notable decisions

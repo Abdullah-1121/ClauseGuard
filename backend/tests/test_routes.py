@@ -18,6 +18,7 @@ from pydantic_ai.models.test import TestModel
 from app.api.routes import rate_limiter
 from app.config import get_settings
 from app.main import app
+from app.models.schemas import ReviewResult, UsageStats
 from app.pipeline import classify, evaluate
 from app.store import ReviewStore
 from tests.test_ingest import DOCX_MIME, build_docx
@@ -73,20 +74,84 @@ async def test_healthz_is_open(client):
     assert res.json() == {"status": "ok"}
 
 
-async def test_playbooks_requires_key(client):
+async def test_playbooks_open(client):
     res = await client.get("/v1/playbooks")
-    assert res.status_code == 401
-
-
-async def test_playbooks_lists_playbooks(client):
-    res = await client.get("/v1/playbooks", headers=AUTH)
     assert res.status_code == 200
     assert "vendor_saas_buyer" in res.json()["playbooks"]
+
+
+async def test_models_open(client):
+    res = await client.get("/v1/models")
+    assert res.status_code == 200
+    providers = res.json()["providers"]
+    assert set(providers) == {"groq", "openrouter"}
+    assert "llama-3.3-70b-versatile" in providers["groq"]["models"]
 
 
 async def test_review_requires_key(client):
     res = await client.post("/v1/reviews", json={"text": CONTRACT})
     assert res.status_code == 401
+
+
+def _fake_result() -> ReviewResult:
+    return ReviewResult(
+        playbook_id="vendor_saas_buyer",
+        clause_count=0,
+        findings=[],
+        usage=UsageStats(),
+    )
+
+
+async def test_review_byok_without_server_key(client, monkeypatch):
+    async def fake_review(_text, _playbook, **_):  # noqa: ANN001
+        return _fake_result()
+
+    monkeypatch.setattr("app.api.routes.review_contract", fake_review)
+    res = await client.post(
+        "/v1/reviews",
+        json={
+            "text": CONTRACT,
+            "provider": "groq",
+            "api_key": "user-key",
+            "model": "llama-3.3-70b-versatile",
+        },
+    )
+    assert res.status_code == 202
+    body = await _wait_completed(client, res.json()["review_id"])
+    assert body["status"] == "completed"
+    # BYOK runs on the caller's quota and must never hit the server budget.
+    today = datetime.now(UTC).date().isoformat()
+    assert await app.state.store.tokens_spent(today) == 0
+
+
+async def test_review_byok_bypasses_exhausted_server_budget(client, monkeypatch):
+    capped = get_settings().model_copy(update={"daily_token_budget": 50, "max_review_chars": 0})
+    monkeypatch.setattr("app.api.routes.get_settings", lambda: capped)
+    today = datetime.now(UTC).date().isoformat()
+    await app.state.store.add_token_spend(today, 50)
+
+    async def fake_review(_text, _playbook, **_):  # noqa: ANN001
+        return _fake_result()
+
+    monkeypatch.setattr("app.api.routes.review_contract", fake_review)
+    res = await client.post(
+        "/v1/reviews",
+        json={
+            "text": CONTRACT,
+            "provider": "openrouter",
+            "api_key": "user-key",
+            "model": "openai/gpt-4o-mini",
+        },
+    )
+    assert res.status_code == 202
+
+
+async def test_review_byok_half_filled_rejected(client):
+    res = await client.post(
+        "/v1/reviews",
+        json={"text": CONTRACT, "provider": "groq", "api_key": "user-key"},
+    )
+    assert res.status_code == 400
 
 
 async def test_review_unknown_playbook(client, offline_models):
